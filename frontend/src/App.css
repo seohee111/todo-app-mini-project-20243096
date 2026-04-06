@@ -1,0 +1,145 @@
+/* src/App.css (최종 과수원 테마 버전) */
+:root {
+  --apple-red: #ff3b30;
+  --apple-green: #4cd964;
+  --text-main: #222;
+  --text-sub: #aaa;
+  --border-line: 2.5px solid #222;
+}
+
+body {
+  margin: 0;
+  /* 🌿 과수원의 풀밭 느낌을 주는 싱그러운 연초록색 배경 */
+  background-color: #f1f8e9; 
+  font-family: 'Pretendard', -apple-system, sans-serif;
+  color: var(--text-main);
+}
+
+.app-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.main-container {
+  width: 100%;
+  max-width: 400px;
+  background: white;
+  border: var(--border-line);
+  border-radius: 35px;
+  padding: 40px 25px;
+  box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.03); /* 그림자를 조금 더 연하게 */
+}
+
+/* 상단 통계 */
+.summary-row {
+  display: flex; gap: 12px; margin-bottom: 35px;
+}
+
+.summary-box {
+  flex: 1; border: var(--border-line); border-radius: 20px;
+  padding: 18px; text-align: center;
+  background: white; /* 박스는 하얀색으로 유지 */
+}
+
+.summary-box .label { font-size: 0.7rem; color: var(--text-sub); font-weight: 700; text-transform: uppercase; }
+.summary-box .count { font-size: 2rem; font-weight: 900; display: block; margin-top: 5px; }
+.summary-box.completed .count { color: var(--apple-red); }
+
+/* 헤더 */
+.section-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+}
+
+.title { 
+  font-size: 2.6rem; font-weight: 900; font-style: italic; margin: 0; 
+  letter-spacing: -1.5px; color: var(--apple-green); /* 타이틀은 사과 초록색 */
+}
+
+.header-date-input {
+  border: 2px solid #eee; border-radius: 12px; padding: 6px 10px;
+  font-family: inherit; font-size: 0.85rem; font-weight: bold; color: #555;
+  outline: none; cursor: pointer;
+}
+
+/* 입력창 */
+.input-group {
+  display: flex; gap: 10px; margin-bottom: 30px;
+}
+
+.input-group input {
+  flex: 1; padding: 16px; border: 1.5px solid #eee;
+  border-radius: 14px; box-sizing: border-box; font-size: 1rem; outline: none;
+}
+
+.add-submit-btn {
+  background: #222; color: white; border: none; border-radius: 12px;
+  padding: 0 20px; font-weight: bold; cursor: pointer; transition: 0.2s;
+}
+
+.add-submit-btn:hover { background: #444; }
+
+/* 리스트 아이템 */
+.list-item {
+  display: flex; align-items: center; gap: 18px; border: var(--border-line);
+  border-radius: 22px; padding: 20px; margin-bottom: 16px; transition: all 0.2s ease;
+  background: white;
+}
+
+.apple-status-icon {
+  font-size: 2.8rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+  user-select: none;
+}
+
+.apple-status-icon:hover { transform: scale(1.1); }
+
+.item-body { flex: 1; }
+.item-title { font-weight: 800; font-size: 1.15rem; color: #333; margin-bottom: 4px; }
+.item-meta { font-size: 0.75rem; color: #999; font-weight: 600; letter-spacing: -0.2px; }
+
+.delete-tag {
+  background: #f2f2f7; color: #888; border: none;
+  padding: 6px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; cursor: pointer;
+}
+
+/* 완료 상태 스타일 */
+.is-done {
+  background-color: #fff9f9;
+  border-color: #ddd;
+}
+
+.is-done .item-title {
+  text-decoration: line-through;
+  color: #bbb;
+}
+
+.is-done .item-meta { color: #ffcdd2; }
+
+/* 🧺 사과 바구니 섹션 디자인 업그레이드 */
+.basket-section {
+  margin-top: 40px; text-align: center;
+}
+
+.apple-basket {
+  /* 🌿 바구니 영역을 과수원 초록톤으로 변경 */
+  background: #e8f5e9; 
+  border: 2px solid #c8e6c9; /* 테두리도 초록초록하게 */
+  border-radius: 25px;
+  padding: 20px; min-height: 85px; margin-bottom: 20px;
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px;
+}
+
+.basket-apple {
+  font-size: 2.2rem;
+  animation: dropIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes dropIn {
+  0% { transform: translateY(-30px) scale(0); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.empty-msg { color: #c8d1ca; font-size: 0.9rem; font-weight: 500; }
+.harvest-text { font-size: 0.95rem; font-weight: 800; color: #444; letter-spacing: -0.5px; }
