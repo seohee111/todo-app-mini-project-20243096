@@ -1,61 +1,75 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import './App.css';
+
+// ⚠️ 로컬 테스트 시에는 5000, 나중에 백엔드 배포하면 그 주소로 바꿀 주소야.
+const API_URL = 'http://localhost:5000/api/todos'; 
 
 function App() {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState('');
-  // 기본 날짜를 오늘 날짜로 설정
+  // 오늘 날짜를 yyyy-mm-dd 형식으로 초기값 설정
   const [dueDate, setDueDate] = useState(new Date().toISOString().split('T')[0]);
 
-  // 1. [로딩] 앱이 처음 켜질 때 브라우저 저장소(localStorage)에서 데이터 불러오기
-  useEffect(() => {
-    const savedData = localStorage.getItem('apple-farm-todos');
-    if (savedData) {
-      setTodos(JSON.parse(savedData));
+  // 1. 데이터 불러오기
+  const fetchTodos = async () => {
+    try {
+      const response = await axios.get(API_URL);
+      setTodos(response.data);
+    } catch (error) { 
+      console.error("데이터 로딩 실패:", error); 
     }
+  };
+
+  useEffect(() => {
+    fetchTodos();
   }, []);
 
-  // 2. [저장] 사과 목록(todos)이 바뀔 때마다 브라우저 저장소에 자동 저장
-  useEffect(() => {
-    localStorage.setItem('apple-farm-todos', JSON.stringify(todos));
-  }, [todos]);
-
-  // 3. [추가] 새로운 사과 심기
-  const addTodo = (e) => {
+  // 2. 새 일정 추가 (날짜 포함)
+  const addTodo = async (e) => {
     e.preventDefault();
     if (!newTodo.trim()) return;
-
-    const newItem = {
-      _id: Date.now().toString(), // 고유 ID 생성
-      title: newTodo,
-      date: dueDate,
-      completed: false
-    };
-
-    setTodos([...todos, newItem]);
-    setNewTodo('');
+    try {
+      // 입력한 제목(title)과 선택한 날짜(date)를 함께 보냄
+      const response = await axios.post(API_URL, { 
+        title: newTodo, 
+        date: dueDate 
+      });
+      setTodos([...todos, response.data]);
+      setNewTodo('');
+    } catch (error) { 
+      console.error("추가 실패:", error); 
+    }
   };
 
-  // 4. [토글] 사과 수확하기 (🍏 <-> 🍎)
-  const toggleTodo = (id) => {
-    setTodos(todos.map(todo => 
-      todo._id === id ? { ...todo, completed: !todo.completed } : todo
-    ));
+  // 3. 완료 상태 토글
+  const toggleTodo = async (id, completed) => {
+    try {
+      const response = await axios.put(`${API_URL}/${id}`, { 
+        completed: !completed 
+      });
+      setTodos(todos.map(todo => (todo._id === id ? response.data : todo)));
+    } catch (error) { 
+      console.error("상태 변경 실패:", error); 
+    }
   };
 
-  // 5. [삭제] 사과 제거하기
-  const deleteTodo = (id) => {
-    setTodos(todos.filter(todo => todo._id !== id));
+  // 4. 삭제
+  const deleteTodo = async (id) => {
+    try {
+      await axios.delete(`${API_URL}/${id}`);
+      setTodos(todos.filter(todo => todo._id !== id));
+    } catch (error) { 
+      console.error("삭제 실패:", error); 
+    }
   };
 
-  // 수확 완료된 사과들 필터링
   const harvestedApples = todos.filter(t => t.completed);
 
   return (
     <div className="app-wrapper">
       <div className="main-container">
         
-        {/* 상단 통계 숫자 박스 */}
         <div className="summary-row">
           <div className="summary-box completed">
             <span className="label">수확한 사과</span>
@@ -67,20 +81,19 @@ function App() {
           </div>
         </div>
 
-        {/* 헤더: 타이틀과 날짜 선택기 */}
         <div className="section-header">
           <h1 className="title">Todo List</h1>
           <div className="date-selector">
+            {/* 📅 날짜 선택기: onChange로 dueDate 상태를 업데이트함 */}
             <input 
               type="date" 
               value={dueDate} 
               onChange={(e) => setDueDate(e.target.value)} 
-              className="header-date-input"
+              className="header-date-input" 
             />
           </div>
         </div>
 
-        {/* 입력 영역 */}
         <form onSubmit={addTodo} className="input-group">
           <input 
             value={newTodo} 
@@ -90,21 +103,19 @@ function App() {
           <button type="submit" className="add-submit-btn">심기</button>
         </form>
 
-        {/* 리스트 영역 */}
         <div className="todo-list-container">
           {todos.map((todo) => (
             <div key={todo._id} className={`list-item ${todo.completed ? 'is-done' : ''}`}>
-              <div className="apple-status-icon" onClick={() => toggleTodo(todo._id)}>
-                {todo.completed ? '🍎' : '🍏'} 
+              <div className="apple-status-icon" onClick={() => toggleTodo(todo._id, todo.completed)}>
+                {todo.completed ? '🍎' : '🍏'}
               </div>
-              
               <div className="item-body">
                 <div className="item-title">{todo.title}</div>
+                {/* 🍎 저장된 날짜가 있으면 보여주고 없으면 '날짜 없음' 표시 */}
                 <div className="item-meta">
                   [ {todo.date || '날짜 없음'} | {todo.completed ? '잘 익은 사과' : '덜 익은 사과'} ]
                 </div>
               </div>
-
               <div className="item-right-actions">
                 <button className="delete-tag" onClick={() => deleteTodo(todo._id)}>삭제</button>
               </div>
@@ -112,22 +123,17 @@ function App() {
           ))}
         </div>
 
-        {/* 하단 사과 바구니 섹션 */}
         <div className="basket-section">
           <div className="apple-basket">
             <div className="basket-body">
               {harvestedApples.length > 0 ? (
-                harvestedApples.map((_, i) => (
-                  <span key={i} className="basket-apple">🍎</span>
-                ))
+                harvestedApples.map((_, i) => <span key={i} className="basket-apple">🍎</span>)
               ) : (
                 <span className="empty-msg">바구니가 비어있어요 🧺</span>
               )}
             </div>
           </div>
-          <div className="harvest-text">
-            오늘도 잘 익은 사과를 하나씩 수확해봐요 !
-          </div>
+          <div className="harvest-text">오늘도 잘 익은 사과를 하나씩 수확해봐요 !</div>
         </div>
       </div>
     </div>
