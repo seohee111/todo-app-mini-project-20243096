@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
-// ⚠️ 로컬 테스트 시에는 5000, 나중에 백엔드 배포하면 그 주소로 바꿀 주소야.
-const API_URL = 'http://localhost:5000/api/todos'; 
+// ✨ 로컬(5000포트)과 배포 환경(/api)을 자동으로 구분하는 주소 설정
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:5000/api/todos' 
+  : '/api/todos';
 
 function App() {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState('');
-  // 오늘 날짜를 yyyy-mm-dd 형식으로 초기값 설정
   const [dueDate, setDueDate] = useState(new Date().toISOString().split('T')[0]);
 
-  // 1. 데이터 불러오기
+  // 1. 데이터 불러오기 (GET)
   const fetchTodos = async () => {
     try {
       const response = await axios.get(API_URL);
@@ -25,12 +26,11 @@ function App() {
     fetchTodos();
   }, []);
 
-  // 2. 새 일정 추가 (날짜 포함)
+  // 2. 새 일정 추가 (POST)
   const addTodo = async (e) => {
     e.preventDefault();
     if (!newTodo.trim()) return;
     try {
-      // 입력한 제목(title)과 선택한 날짜(date)를 함께 보냄
       const response = await axios.post(API_URL, { 
         title: newTodo, 
         date: dueDate 
@@ -42,7 +42,7 @@ function App() {
     }
   };
 
-  // 3. 완료 상태 토글
+  // 3. 완료 상태 토글 (PUT)
   const toggleTodo = async (id, completed) => {
     try {
       const response = await axios.put(`${API_URL}/${id}`, { 
@@ -54,7 +54,7 @@ function App() {
     }
   };
 
-  // 4. 삭제
+  // 4. 삭제 (DELETE)
   const deleteTodo = async (id) => {
     try {
       await axios.delete(`${API_URL}/${id}`);
@@ -84,7 +84,6 @@ function App() {
         <div className="section-header">
           <h1 className="title">Todo List</h1>
           <div className="date-selector">
-            {/* 📅 날짜 선택기: onChange로 dueDate 상태를 업데이트함 */}
             <input 
               type="date" 
               value={dueDate} 
@@ -111,7 +110,6 @@ function App() {
               </div>
               <div className="item-body">
                 <div className="item-title">{todo.title}</div>
-                {/* 🍎 저장된 날짜가 있으면 보여주고 없으면 '날짜 없음' 표시 */}
                 <div className="item-meta">
                   [ {todo.date || '날짜 없음'} | {todo.completed ? '잘 익은 사과' : '덜 익은 사과'} ]
                 </div>
